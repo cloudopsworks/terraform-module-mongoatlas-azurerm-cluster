@@ -6,3 +6,20 @@
 #       WebSite: https://cloudops.works
 #     Distributed Under Apache v2.0 License
 #
+
+module "cluster" {
+  source = "git::https://github.com/cloudopsworks/terraform-module-mongoatlas-cluster.git?ref=feature/refactor-generic-no-cloud-deps"
+
+  is_hub       = var.is_hub
+  spoke_def    = var.spoke_def
+  org          = var.org
+  extra_tags   = var.extra_tags
+  name_prefix  = var.name_prefix
+  name         = var.name
+  project_id   = var.project_id
+  project_name = var.project_name
+  # Azure region names (e.g. "eastus2") do not map 1:1 to Atlas region names.
+  # Use settings.regions[].region to specify Atlas region names explicitly (e.g. "US_EAST_2").
+  region   = var.region
+  settings = var.settings
+}
