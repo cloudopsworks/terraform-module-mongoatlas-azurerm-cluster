@@ -16,7 +16,7 @@ terraform {
     }
     mongodbatlas = {
       source  = "mongodb/mongodbatlas"
-      version = "~> 1.32"
+      version = "~> 2.1"
     }
     time = {
       source  = "hashicorp/time"
