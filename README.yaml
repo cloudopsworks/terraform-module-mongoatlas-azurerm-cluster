@@ -2,11 +2,11 @@ name: Terraform MongoDB Atlas Cluster with Azure Integration
 #logo: logo/logo.jpg
 badges:
   - name: Latest Release
-    image: https://img.shields.io/github/release/cloudopsworks/terraform-module-mongoatlas-azure-rm-cluster.svg?style=for-the-badge
-    url: https://github.com/cloudopsworks/terraform-module-mongoatlas-azure-rm-cluster/releases/latest
+    image: https://img.shields.io/github/release/cloudopsworks/terraform-module-mongoatlas-azurerm-cluster.svg?style=for-the-badge
+    url: https://github.com/cloudopsworks/terraform-module-mongoatlas-azurerm-cluster/releases/latest
   - name: Last Updated
-    image: https://img.shields.io/github/last-commit/cloudopsworks/terraform-module-mongoatlas-azure-rm-cluster.svg?style=for-the-badge
-    url: https://github.com/cloudopsworks/terraform-module-mongoatlas-azure-rm-cluster/commits
+    image: https://img.shields.io/github/last-commit/cloudopsworks/terraform-module-mongoatlas-azurerm-cluster.svg?style=for-the-badge
+    url: https://github.com/cloudopsworks/terraform-module-mongoatlas-azurerm-cluster/commits
 
 license: "APACHE2"
 
@@ -15,7 +15,7 @@ copyrights:
     url: "https://cloudopsworks.co"
     year: "2024"
 
-github_repo: cloudopsworks/terraform-module-mongoatlas-azure-rm-cluster
+github_repo: cloudopsworks/terraform-module-mongoatlas-azurerm-cluster
 
 description: |-
   Terraform module for provisioning MongoDB Atlas clusters with Azure provider integration.
@@ -52,7 +52,7 @@ usage: |-
   }
 
   terraform {
-    source = "git::https://github.com/cloudopsworks/terraform-module-mongoatlas-azure-rm-cluster.git?ref=v1.0.0"
+    source = "git::https://github.com/cloudopsworks/terraform-module-mongoatlas-azurerm-cluster.git?ref=v1.0.0"
   }
 
   inputs = {
