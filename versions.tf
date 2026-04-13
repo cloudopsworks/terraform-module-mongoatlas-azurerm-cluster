@@ -12,11 +12,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.59"
+      version = "~> 4.68"
     }
     mongodbatlas = {
       source  = "mongodb/mongodbatlas"
-      version = "~> 2.1"
+      version = "~> 2.10"
     }
     time = {
       source  = "hashicorp/time"
@@ -24,7 +24,7 @@ terraform {
     }
     random = {
       source  = "hashicorp/random"
-      version = "~> 3.4"
+      version = "~> 3.8"
     }
   }
 }

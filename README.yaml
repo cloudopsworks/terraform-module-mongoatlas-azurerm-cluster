@@ -2,7 +2,7 @@ name: Terraform MongoDB Atlas Cluster with Azure Integration
 #logo: logo/logo.jpg
 badges:
   - name: Latest Release
-    image: https://img.shields.io/github/release/cloudopsworks/terraform-module-mongoatlas-azurerm-cluster.svg?style=for-the-badge
+    image: https://img.shields.io/github/v/release/cloudopsworks/terraform-module-mongoatlas-azurerm-cluster?style=for-the-badge
     url: https://github.com/cloudopsworks/terraform-module-mongoatlas-azurerm-cluster/releases/latest
   - name: Last Updated
     image: https://img.shields.io/github/last-commit/cloudopsworks/terraform-module-mongoatlas-azurerm-cluster.svg?style=for-the-badge
@@ -52,7 +52,7 @@ usage: |-
   }
 
   terraform {
-    source = "git::https://github.com/cloudopsworks/terraform-module-mongoatlas-azurerm-cluster.git?ref=v1.0.0"
+    source = "git::https://github.com/cloudopsworks/terraform-module-mongoatlas-azurerm-cluster.git?ref=v1.2.0"
   }
 
   inputs = {

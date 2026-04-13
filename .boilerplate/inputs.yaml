@@ -1,1 +1,325 @@
-# Module configuration
+# Module configuration for MongoDB Atlas Cluster with Azure Integration
+
+# (Required) Azure region for resource naming and deployment.
+# Example: "eastus2", "westus2", "northeurope"
+region: "eastus2"
+
+# (Required) Unique identifier prefix for resources.
+name_prefix: "mdb"
+
+# (Required) Name of the MongoDB Atlas cluster.
+name: "production-cluster"
+
+# (Optional) The ID of the Atlas project where the cluster will be created.
+# If not provided, must be set via environment or other means.
+project_id: ""
+
+# (Optional) The name of the Atlas project where the cluster will be created.
+# Used for tagging and identification purposes.
+project_name: ""
+
+# (Required) Module settings object containing all cluster configuration.
+# All nested attributes follow YAML structure as documented below.
+settings:
+  # (Optional) Cluster deployment type.
+  # Valid values: REPLICASET | SHARDED | GEOSHARDED
+  # Default: "REPLICASET"
+  cluster_type: "REPLICASET"
+
+  # (Optional) MongoDB major version to deploy.
+  # Default: null (uses Atlas default)
+  major_version: 7.0
+
+  # (Optional) Enable cluster termination protection.
+  # Default: null (disabled)
+  termination_protection: true
+
+  # (Optional) Version release type for MongoDB updates.
+  # Valid values: LTS | CONTINUOUS
+  # Default: "LTS"
+  version_release: "LTS"
+
+  # (Optional) Enable encryption at rest for cluster data.
+  # Default: false
+  encryption_at_rest_enabled: false
+
+  # (Optional) Cloud provider for encryption at rest.
+  # This module defaults to "AZURE" when enabled.
+  # Valid values: AWS | GCP | AZURE
+  encryption_at_rest_provider: "AZURE"
+
+  # (Optional) BI Connector configuration.
+  bi_connector:
+    # (Optional) Enable BI Connector for MongoDB.
+    # Default: false
+    enabled: false
+
+    # (Optional) Read preference for BI Connector queries.
+    # Valid values: primary | secondary | primaryPreferred | secondaryPreferred | nearest
+    # Default: "secondary"
+    read_preference: "secondary"
+
+  # (Optional) Atlas admin user configuration with Azure Key Vault integration.
+  admin_user:
+    # (Optional) Create an Atlas admin user and store credentials in Key Vault.
+    # Default: false
+    enabled: false
+
+    # (Optional) Username for the admin user.
+    # Default: auto-generated if not specified
+    username: "admin"
+
+    # (Optional) Authentication database for the admin user.
+    # Default: "admin"
+    auth_database: "admin"
+
+    # (Required when enabled) Name of the Azure Key Vault to store credentials.
+    key_vault_name: "my-kv"
+
+    # (Required when enabled) Resource group containing the Key Vault.
+    key_vault_resource_group: "my-rg"
+
+    # (Optional) Password rotation period in days managed by Terraform time_rotating.
+    # Default: 90
+    password_rotation_period: 90
+
+  # (Optional) Advanced MongoDB configuration options.
+  advanced:
+    # (Optional) Default write concern for the cluster.
+    # Default: null
+    default_write_concern: "majority"
+
+    # (Optional) Enable JavaScript execution on the cluster.
+    # Default: null
+    javascript: false
+
+    # (Optional) TLS protocol version for client connections.
+    # Valid values: TLS1_0 | TLS1_1 | TLS1_2 | TLS1_3
+    # Default: null
+    tls_protocol: "TLS1_2"
+
+    # (Optional) Disable table scans for all databases.
+    # Default: null
+    no_table_scan: false
+
+    # (Optional) Oplog size in megabytes.
+    # Default: null
+    oplog_size: 50
+
+    # (Optional) Oplog retention period in hours.
+    # Default: null
+    oplog_retention: 30
+
+    # (Optional) BI Connector advanced settings.
+    bi:
+      # (Optional) Sample size for BI Connector schema refresh.
+      # Default: null
+      sample_size: 1000
+
+      # (Optional) Refresh interval in seconds for BI Connector.
+      # Default: null
+      refresh_interval: 60
+
+    # (Optional) Transaction lifetime limit in seconds.
+    # Default: null
+    transaction_lifetime: 30
+
+  # (Optional) Cloud backup (Cloud Backups) configuration.
+  backup:
+    # (Optional) Enable cloud backup for the cluster.
+    # Default: false
+    enabled: false
+
+    # (Optional) Hour of day (0-23) when backup window starts.
+    # Default: 0
+    hour_of_day: 2
+
+    # (Optional) Minute of hour (0-59) when backup window starts.
+    # Default: 0
+    minute_of_hour: 0
+
+    # (Optional) Number of days for point-in-time restore window.
+    # Default: 1
+    restore_window_days: 7
+
+    # (Optional) Enable automatic export of backups.
+    # Default: null
+    auto_export: false
+
+    # (Optional) Hourly backup retention policy.
+    hourly:
+      # (Optional) Frequency between hourly snapshots in hours.
+      # Default: 1
+      interval: 6
+
+      # (Optional) Retention unit for hourly snapshots.
+      # Fixed to "days" for hourly.
+      retention_unit: "days"
+
+      # (Optional) Number of units to retain hourly snapshots.
+      # Default: 1
+      retention_value: 2
+
+    # (Optional) Daily backup retention policy.
+    daily:
+      # (Optional) Frequency between daily snapshots in days.
+      # Default: 1
+      interval: 1
+
+      # (Optional) Retention unit for daily snapshots.
+      # Fixed to "days" for daily.
+      retention_unit: "days"
+
+      # (Optional) Number of days to retain daily snapshots.
+      # Default: 7
+      retention_value: 7
+
+    # (Optional) Weekly backup retention policy.
+    weekly:
+      # (Optional) Day of week (1-7) for weekly snapshots.
+      # Default: 1
+      interval: 1
+
+      # (Optional) Retention unit for weekly snapshots.
+      # Fixed to "weeks" for weekly.
+      retention_unit: "weeks"
+
+      # (Optional) Number of weeks to retain weekly snapshots.
+      # Default: 4
+      retention_value: 4
+
+    # (Optional) Monthly backup retention policy.
+    monthly:
+      # (Optional) Day of month (1-28) for monthly snapshots.
+      # Default: 1
+      interval: 1
+
+      # (Optional) Retention unit for monthly snapshots.
+      # Fixed to "months" for monthly.
+      retention_unit: "months"
+
+      # (Optional) Number of months to retain monthly snapshots.
+      # Default: 12
+      retention_value: 12
+
+    # (Optional) Yearly backup retention policy.
+    yearly:
+      # (Optional) Month of year (1-12) for yearly snapshots.
+      # Default: 1
+      interval: 1
+
+      # (Optional) Retention unit for yearly snapshots.
+      # Fixed to "years" for yearly.
+      retention_unit: "years"
+
+      # (Optional) Number of years to retain yearly snapshots.
+      # Default: 2
+      retention_value: 2
+
+    # (Optional) Export configuration for backup data.
+    export:
+      # (Optional) Cloud provider for export destination.
+      # Default: "AZURE"
+      cloud_provider: "AZURE"
+
+      # (Required for AZURE) Azure Blob Storage container URL for exports.
+      # Example: "https://myaccount.blob.core.windows.net/mycontainer"
+      service_url: "https://..."
+
+      # (Required for AZURE) Atlas Azure service principal role ID.
+      role_id: "role-id"
+
+      # (Optional) Frequency type for export snapshots.
+      # Valid values: hourly | daily | weekly | monthly
+      # Default: "daily"
+      frequency_type: "daily"
+
+  # (Optional) Global cluster configuration for multi-cloud deployments.
+  global:
+    # (Optional) Name of the zone for global clusters.
+    # Default: null
+    zone_name: "Zone 1"
+
+    # (Optional) ID of the zone for global clusters.
+    # Default: null
+    zone_id: ""
+
+  # (Optional) List of region configurations for cluster deployment.
+  # Azure region names must be set explicitly - they do NOT match Azure region names.
+  # Example: Azure "eastus2" -> Atlas "US_EAST_2"
+  regions:
+    - # (Optional) Cloud provider backing the deployment.
+      # Valid values: AWS | GCP | AZURE
+      # Default: null
+      backing_provider: "AZURE"
+
+      # (Optional) Primary cloud provider for this region.
+      # Valid values: AWS | GCP | AZURE | TENANT
+      # Default: "TENANT"
+      provider: "AZURE"
+
+      # (Required for AZURE) Atlas region name in uppercase underscore format.
+      # This MUST be set explicitly - var.region is NOT auto-converted.
+      # Common Azure regions: US_EAST_2, US_WEST, EUROPE_NORTH, EUROPE_WEST
+      # See full list: https://www.mongodb.com/docs/atlas/reference/microsoft-azure/
+      region: "US_EAST_2"
+
+      # (Optional) Electable node priority (1-7, higher = more likely to be primary).
+      # Default: 7
+      priority: 7
+
+      # (Optional) Electable node pool configuration.
+      electable:
+        # (Optional) Instance size for electable nodes.
+        # Default: "M2"
+        size: "M10"
+
+        # (Optional) Number of electable nodes.
+        # Default: null
+        count: 3
+
+        # (Optional) Disk size in GB for electable nodes.
+        # Default: null
+        disk_size: 100
+
+      # (Optional) Analytics node pool configuration.
+      analytics:
+        # (Optional) Instance size for analytics nodes.
+        # Default: "M2"
+        size: "M10"
+
+        # (Optional) Number of analytics nodes.
+        # Default: null
+        count: 1
+
+      # (Optional) Read-only node pool configuration.
+      read_only:
+        # (Optional) Instance size for read-only nodes.
+        # Default: "M2"
+        size: "M10"
+
+        # (Optional) Number of read-only nodes.
+        # Default: null
+        count: 0
+
+      # (Optional) Auto-scaling configuration.
+      auto_scaling:
+        # (Optional) Enable automatic disk size scaling.
+        # Default: false
+        disk: false
+
+        # (Optional) Enable automatic compute instance scaling.
+        # Default: false
+        compute: false
+
+        # (Optional) Maximum instance size for auto-scaling.
+        # Default: null
+        max_size: "M40"
+
+        # (Optional) Minimum instance size for auto-scaling.
+        # Default: null
+        min_size: "M10"
+
+        # (Optional) Enable automatic scale-down when load decreases.
+        # Default: false
+        scale_down: false
