@@ -80,13 +80,15 @@ include "root" {
 }
 
 terraform {
-  source = "git::https://github.com/cloudopsworks/terraform-module-mongoatlas-azurerm-cluster.git?ref=v1.2.0"
+  source = "git::https://github.com/cloudopsworks/terraform-module-mongoatlas-azurerm-cluster.git?ref=v1.0.1"
 }
 
 inputs = {
-  region      = "eastus2"            # (Required) Azure region for resource naming
-  project_id  = "your-atlas-project-id"
-  name        = "my-cluster"
+  region       = "eastus2"                   # (Required) Azure region for resource naming. Default: ""
+  name_prefix  = "mdb"                       # (Optional) Prefix for resource names. Default: ""
+  name         = "my-cluster"                # (Optional) Name of the MongoDB Atlas cluster. Default: ""
+  project_id   = "your-atlas-project-id"    # (Optional) Atlas project ID. Default: ""
+  project_name = "my-project"               # (Optional) Atlas project name for tagging. Default: ""
 
   settings = {
     cluster_type:  "REPLICASET"      # (Optional) REPLICASET | SHARDED | GEOSHARDED. Default: "REPLICASET"
