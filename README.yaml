@@ -1,37 +1,196 @@
-name: Terraform Transit Gateway Module
+name: Terraform MongoDB Atlas Cluster with Azure Integration
 #logo: logo/logo.jpg
 badges:
   - name: Latest Release
-    image: https://img.shields.io/github/release/<owner/repo>.svg?style=for-the-badge
-    url: https://github.com/<owner/repo>/releases/latest
+    image: https://img.shields.io/github/v/release/cloudopsworks/terraform-module-mongoatlas-azurerm-cluster?style=for-the-badge
+    url: https://github.com/cloudopsworks/terraform-module-mongoatlas-azurerm-cluster/releases/latest
   - name: Last Updated
-    image: https://img.shields.io/github/last-commit/<owner/repo>.svg?style=for-the-badge
-    url: https://github.com/<owner/repo>/commits
+    image: https://img.shields.io/github/last-commit/cloudopsworks/terraform-module-mongoatlas-azurerm-cluster.svg?style=for-the-badge
+    url: https://github.com/cloudopsworks/terraform-module-mongoatlas-azurerm-cluster/commits
 
 license: "APACHE2"
 
 copyrights:
   - name: "Cloud Ops Works LLC"
     url: "https://cloudopsworks.co"
-    year: "2026"
+    year: "2024"
 
-github_repo: <owner/repo>
+github_repo: cloudopsworks/terraform-module-mongoatlas-azurerm-cluster
 
 description: |-
-  <description>
+  Terraform module for provisioning MongoDB Atlas clusters with Azure provider integration.
+  Wraps the generic [`terraform-module-mongoatlas-cluster`](https://github.com/cloudopsworks/terraform-module-mongoatlas-cluster)
+  and adds Azure-specific features: Azure Key Vault credential storage and optional CMEK encryption.
 
 # Introduction to the project
 introduction: |-
-#  This is an introduction.
+  This module is the Azure-specific wrapper for the generic MongoDB Atlas cluster module.
+  It handles all Azure provider interactions, including:
+
+  - MongoDB Atlas cluster provisioning (delegated to the generic module)
+  - Azure Key Vault for secure admin credential storage (stores JSON-encoded credentials as a secret)
+  - Existing Key Vault referenced by name and resource group — the Key Vault must be pre-provisioned
+  - Automatic subscription data via `data.azurerm_subscription.current`
+  - Region shortcode mapping for `system_name` construction (via boilerplate `locals.tf`)
+
+  The cluster admin credentials are stored in an Azure Key Vault secret and
+  exposed via the `cluster_key_vault_secret_id` and `cluster_key_vault_secret_name` outputs.
+
+  **Important:** Azure region names (e.g. `eastus2`) do NOT map directly to MongoDB Atlas region
+  names (e.g. `US_EAST_2`). Always set `settings.regions[].region` explicitly using Atlas Azure
+  region names. See the [Atlas documentation](https://www.mongodb.com/docs/atlas/reference/microsoft-azure/)
+  for the full list.
 
 # How to use this project
 usage: |-
+  ### Terragrunt Usage
+
+  ```hcl
+  # terragrunt.hcl
+  include "root" {
+    path = find_in_parent_folders()
+  }
+
+  terraform {
+    source = "git::https://github.com/cloudopsworks/terraform-module-mongoatlas-azurerm-cluster.git?ref=v1.2.0"
+  }
+
+  inputs = {
+    region      = "eastus2"            # (Required) Azure region for resource naming
+    project_id  = "your-atlas-project-id"
+    name        = "my-cluster"
+
+    settings = {
+      cluster_type:  "REPLICASET"      # (Optional) REPLICASET | SHARDED | GEOSHARDED. Default: "REPLICASET"
+      major_version: 7.0               # (Optional) MongoDB major version. Default: null
+      termination_protection: true     # (Optional) Enable termination protection. Default: null
+      version_release: "LTS"           # (Optional) LTS | CONTINUOUS. Default: "LTS"
+
+      admin_user:
+        enabled:                  true       # (Optional) Create Atlas admin user. Default: false
+        username:                 "admin"    # (Optional) Username. Default: auto-generated
+        auth_database:            "admin"    # (Optional) Authentication database. Default: "admin"
+        key_vault_name:           "my-kv"   # (Required when enabled) Azure Key Vault name
+        key_vault_resource_group: "my-rg"   # (Required when enabled) Key Vault resource group
+        password_rotation_period: 90        # (Optional) Terraform-managed rotation period in days. Default: 90
+
+      regions:
+        - provider:          "AZURE"       # (Optional) AZURE | AWS | GCP | TENANT. Default: "TENANT"
+          backing_provider:  "AZURE"       # (Optional) Backing provider. Default: null
+          region:            "US_EAST_2"   # (Required) Atlas Azure region name — must be set explicitly
+          priority:          7             # (Optional) Node priority 1-7. Default: 7
+          electable:
+            size:  "M10"    # (Optional) Instance size. Default: "M2"
+            count: 3        # (Optional) Node count. Default: null
+
+      backup:
+        enabled:             true  # (Optional) Enable cloud backup. Default: false
+        hour_of_day:         2     # (Optional) Backup hour 0-23. Default: 0
+        restore_window_days: 7     # (Optional) Restore window in days. Default: 1
+        daily:
+          retention_value: 7       # (Optional) Daily retention in days. Default: 7
+        weekly:
+          retention_value: 4       # (Optional) Weekly retention in weeks. Default: 4
+        monthly:
+          retention_value: 12      # (Optional) Monthly retention in months. Default: 12
+    }
+  }
+  ```
 
 # Example usage
 examples: |-
+  ### Basic Azure Cluster
+
+  ```hcl
+  inputs = {
+    region     = "eastus2"
+    project_id = "your-atlas-project-id"
+    name       = "azure-cluster"
+
+    settings = {
+      cluster_type           = "REPLICASET"
+      major_version          = 7.0
+      termination_protection = true
+      admin_user = {
+        enabled                  = true
+        username                 = "azure-admin"
+        key_vault_name           = "prod-kv"
+        key_vault_resource_group = "prod-rg"
+      }
+      regions = [{
+        provider         = "AZURE"
+        backing_provider = "AZURE"
+        region           = "US_EAST_2"
+        priority         = 7
+        electable = {
+          size  = "M10"
+          count = 3
+        }
+      }]
+    }
+  }
+  ```
+
+  ### Multi-Region Cluster
+
+  ```hcl
+  inputs = {
+    region     = "eastus2"
+    project_id = "your-atlas-project-id"
+    name       = "multi-region-cluster"
+
+    settings = {
+      cluster_type = "REPLICASET"
+      admin_user = {
+        enabled                  = true
+        key_vault_name           = "prod-kv"
+        key_vault_resource_group = "prod-rg"
+      }
+      regions = [
+        {
+          provider         = "AZURE"
+          backing_provider = "AZURE"
+          region           = "US_EAST_2"
+          priority         = 7
+          electable        = { size = "M10", count = 3 }
+        },
+        {
+          provider         = "AZURE"
+          backing_provider = "AZURE"
+          region           = "US_WEST"
+          priority         = 6
+          electable        = { size = "M10", count = 2 }
+        }
+      ]
+    }
+  }
+  ```
 
 # How to get started quickly
 quickstart: |-
+  1. Configure Azure and MongoDB Atlas credentials:
+     ```bash
+     az login
+     export MONGODB_ATLAS_PUBLIC_KEY="your_public_key"
+     export MONGODB_ATLAS_PRIVATE_KEY="your_private_key"
+     ```
+
+  2. Ensure the Azure Key Vault exists and your identity has `Key Vault Secrets Officer` permissions.
+
+  3. Create a Terragrunt configuration using the usage example above.
+
+  4. Initialize and apply:
+     ```bash
+     terraform init && terraform apply
+     ```
+
+  5. Retrieve credentials from Key Vault:
+     ```bash
+     az keyvault secret show \
+       --vault-name my-kv \
+       --name $(terraform output -raw cluster_key_vault_secret_name) \
+       --query value -o tsv | jq .
+     ```
 
 include:
   - "docs/targets.md"
