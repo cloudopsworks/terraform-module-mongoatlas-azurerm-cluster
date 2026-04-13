@@ -18,7 +18,7 @@
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_cluster"></a> [cluster](#module\_cluster) | git::https://github.com/cloudopsworks/terraform-module-mongoatlas-cluster.git | v1.2.0 |
+| <a name="module_cluster"></a> [cluster](#module\_cluster) | git::https://github.com/cloudopsworks/terraform-module-mongoatlas-cluster.git | v1.2.1 |
 | <a name="module_tags"></a> [tags](#module\_tags) | cloudopsworks/tags/local | 1.0.9 |
 
 ## Resources
@@ -33,6 +33,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_cloud_provider"></a> [cloud\_provider](#input\_cloud\_provider) | Default cloud provider for Atlas backup export bucket and copy settings. Valid values: 'AWS', 'GCP', 'AZURE'. Can be overridden per-resource in settings. | `string` | `"AZURE"` | no |
 | <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags) | Extra tags to add to the resources | `map(string)` | `{}` | no |
 | <a name="input_is_hub"></a> [is\_hub](#input\_is\_hub) | Is this a hub or spoke configuration? | `bool` | `false` | no |
 | <a name="input_name"></a> [name](#input\_name) | Name of the resource | `string` | `""` | no |
@@ -41,6 +42,7 @@
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | (optional) The ID of the Atlas project where the cluster will be created | `string` | `""` | no |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | (optional) The name of the Atlas project where the cluster will be created | `string` | `""` | no |
 | <a name="input_region"></a> [region](#input\_region) | Azure Region to deploy resources into. Example: 'eastus2', defaults to empty string as some of the resources may not require region setting. | `string` | `""` | no |
+| <a name="input_run_hoop"></a> [run\_hoop](#input\_run\_hoop) | Run hoop with agent, be careful with this option, it will run the HOOP command in output in a null\_resource | `bool` | `false` | no |
 | <a name="input_settings"></a> [settings](#input\_settings) | Settings for the MongoDB Atlas cluster and Azure integrations | `any` | `{}` | no |
 | <a name="input_spoke_def"></a> [spoke\_def](#input\_spoke\_def) | Spoke ID Number, must be a 3 digit number | `string` | `"001"` | no |
 
