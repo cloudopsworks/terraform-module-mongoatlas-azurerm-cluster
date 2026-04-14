@@ -18,6 +18,15 @@ project_id: ""
 # Used for tagging and identification purposes.
 project_name: ""
 
+# (Optional) Default cloud provider for Atlas backup export bucket and copy settings.
+# Valid values: AWS | GCP | AZURE
+# Default: "AZURE"
+cloud_provider: "AZURE"
+
+# (Optional) Run hoop with agent. Be careful — this executes the HOOP command via a null_resource.
+# Default: false
+run_hoop: false
+
 # (Required) Module settings object containing all cluster configuration.
 # All nested attributes follow YAML structure as documented below.
 settings:
@@ -47,6 +56,11 @@ settings:
   # This module defaults to "AZURE" when enabled.
   # Valid values: AWS | GCP | AZURE
   encryption_at_rest_provider: "AZURE"
+
+  # (Optional) Default cloud provider override for backup export/copy within settings.
+  # Valid values: AWS | GCP | AZURE
+  # Default: inherits from var.cloud_provider ("AZURE")
+  cloud_provider: "AZURE"
 
   # (Optional) BI Connector configuration.
   bi_connector:
@@ -78,6 +92,22 @@ settings:
 
     # (Required when enabled) Resource group containing the Key Vault.
     key_vault_resource_group: "my-rg"
+
+    # (Optional) When true, an external rotation manager handles the password.
+    # Default: false
+    use_external_rotation: false
+
+    # (Optional) External rotator identifier (e.g. Lambda name for AWS).
+    # Required when use_external_rotation is true.
+    rotation_lambda_name: ""
+
+    # (Optional) Password rotation period in days.
+    # Default: 90
+    rotation_period: 90
+
+    # (Optional) Duration allowed for external rotator execution.
+    # Default: "1h"
+    rotation_duration: "1h"
 
     # (Optional) Password rotation period in days managed by Terraform time_rotating.
     # Default: 90
@@ -120,7 +150,7 @@ settings:
       # Default: null
       refresh_interval: 60
 
-    # (Optional) Transaction lifetime limit in seconds.
+    # (Optional) Transaction lifetime limit in minutes.
     # Default: null
     transaction_lifetime: 30
 
@@ -143,8 +173,12 @@ settings:
     restore_window_days: 7
 
     # (Optional) Enable automatic export of backups.
-    # Default: null
+    # Default: false
     auto_export: false
+
+    # (Optional) Prefix for exported backup file names.
+    # Default: null
+    export_prefix: ""
 
     # (Optional) Hourly backup retention policy.
     hourly:
@@ -218,43 +252,65 @@ settings:
 
     # (Optional) Export configuration for backup data.
     export:
-      # (Optional) Cloud provider for export destination.
-      # Default: "AZURE"
+      # (Optional) Override cloud provider for this export bucket.
+      # Valid values: AWS | GCP | AZURE
+      # Default: settings.cloud_provider ("AZURE")
       cloud_provider: "AZURE"
 
-      # (Required for AZURE) Azure Blob Storage container URL for exports.
+      # (Required for AWS) S3 bucket name for the export destination.
+      bucket_name: ""
+
+      # (Required for AWS) IAM role ID (assumed role) for bucket access.
+      iam_role_id: ""
+
+      # (Required for GCP/AZURE) Service URL for the export bucket.
       # Example: "https://myaccount.blob.core.windows.net/mycontainer"
       service_url: "https://..."
 
-      # (Required for AZURE) Atlas Azure service principal role ID.
+      # (Required for GCP/AZURE) Role ID for bucket access.
       role_id: "role-id"
 
-      # (Optional) Frequency type for export snapshots.
-      # Valid values: hourly | daily | weekly | monthly
-      # Default: "daily"
-      frequency_type: "daily"
+      # (Optional) Frequency type for exported snapshots.
+      # Valid values: HOURLY | DAILY | WEEKLY | MONTHLY | YEARLY
+      # Default: "DAILY"
+      frecuency_type: "DAILY"
 
-  # (Optional) Global cluster configuration for multi-cloud deployments.
+    # (Optional) Cross-region copy settings for backup snapshots.
+    copy:
+      # (Optional) Override cloud provider for copy settings.
+      # Valid values: AWS | GCP | AZURE
+      # Default: settings.cloud_provider ("AZURE")
+      cloud_provider: "AZURE"
+
+      # (Optional) List of snapshot frequency types to include in copy.
+      # Example: ["DAILY", "WEEKLY"]
+      frequencies: []
+
+      # (Optional) Target Atlas region name for the copy destination.
+      # Default: deployment region converted to Atlas format
+      region_name: "US_EAST_2"
+
+      # (Optional) Include oplogs in the copied snapshot.
+      # Default: false
+      copy_oplogs: false
+
+  # (Optional) Global cluster zone configuration (used for GEOSHARDED clusters).
   global:
-    # (Optional) Name of the zone for global clusters.
+    # (Optional) Zone name for the primary replication spec.
     # Default: null
     zone_name: "Zone 1"
 
-    # (Optional) ID of the zone for global clusters.
-    # Default: null
-    zone_id: ""
-
-  # (Optional) List of region configurations for cluster deployment.
-  # Azure region names must be set explicitly - they do NOT match Azure region names.
+  # (Optional) List of region configurations for the primary replication spec.
+  # Azure Atlas region names must be set explicitly — they do NOT match Azure region names.
   # Example: Azure "eastus2" -> Atlas "US_EAST_2"
   regions:
-    - # (Optional) Cloud provider backing the deployment.
+    - # (Optional) Backing cloud provider for TENANT clusters.
       # Valid values: AWS | GCP | AZURE
       # Default: null
       backing_provider: "AZURE"
 
-      # (Optional) Primary cloud provider for this region.
-      # Valid values: AWS | GCP | AZURE | TENANT
+      # (Optional) Primary cloud provider type for this region.
+      # Valid values: TENANT | AWS | GCP | AZURE
       # Default: "TENANT"
       provider: "AZURE"
 
@@ -278,9 +334,9 @@ settings:
         # Default: null
         count: 3
 
-        # (Optional) Disk size in GB for electable nodes.
+        # (Optional) Disk size in GB, set at spec level (required by provider v2.0+).
         # Default: null
-        disk_size: 100
+        disk_size: 10
 
       # (Optional) Analytics node pool configuration.
       analytics:
@@ -292,6 +348,10 @@ settings:
         # Default: null
         count: 1
 
+        # (Optional) Disk size in GB for analytics nodes.
+        # Default: null
+        disk_size: 10
+
       # (Optional) Read-only node pool configuration.
       read_only:
         # (Optional) Instance size for read-only nodes.
@@ -302,7 +362,11 @@ settings:
         # Default: null
         count: 0
 
-      # (Optional) Auto-scaling configuration.
+        # (Optional) Disk size in GB for read-only nodes.
+        # Default: null
+        disk_size: 10
+
+      # (Optional) Auto-scaling configuration for electable nodes.
       auto_scaling:
         # (Optional) Enable automatic disk size scaling.
         # Default: false
@@ -312,14 +376,70 @@ settings:
         # Default: false
         compute: false
 
-        # (Optional) Maximum instance size for auto-scaling.
+        # (Optional) Maximum instance size for compute auto-scaling.
         # Default: null
         max_size: "M40"
 
-        # (Optional) Minimum instance size for auto-scaling.
+        # (Optional) Minimum instance size for compute auto-scaling.
         # Default: null
         min_size: "M10"
 
-        # (Optional) Enable automatic scale-down when load decreases.
+        # (Optional) Allow scale-down when load decreases.
         # Default: false
         scale_down: false
+
+        # (Optional) Auto-scaling settings for analytics nodes.
+        analytics:
+          # (Optional) Enable disk auto-scaling for analytics nodes.
+          # Default: false
+          disk: false
+
+          # (Optional) Enable compute auto-scaling for analytics nodes.
+          # Default: false
+          compute: false
+
+          # (Optional) Maximum instance size for analytics auto-scaling.
+          # Default: null
+          max_size: "M40"
+
+          # (Optional) Minimum instance size for analytics auto-scaling.
+          # Default: null
+          min_size: "M10"
+
+          # (Optional) Allow scale-down for analytics nodes.
+          # Default: false
+          scale_down: false
+
+  # (Optional) Additional shards for SHARDED / GEOSHARDED clusters.
+  # Each entry creates one additional replication_specs element (provider v2.0 independent shard scaling).
+  # Default: []
+  shards:
+    - # (Optional) Zone name for this shard (required for GEOSHARDED clusters).
+      # Default: null
+      zone_name: "zone-1"
+
+      # (Optional) Region configurations for this shard.
+      # Same structure as settings.regions above.
+      regions:
+        - provider: "AZURE"
+          backing_provider: "AZURE"
+          region: "EUROPE_WEST"
+          priority: 7
+          electable:
+            size: "M30"
+            count: 3
+            disk_size: 10
+
+  # (Optional) HOOP agent integration configuration.
+  hoop:
+    # (Optional) Enable HOOP agent integration for cluster access.
+    # Default: false
+    enabled: false
+
+    # (Optional) HOOP agent name to associate with this cluster.
+    # Default: null
+    agent: "hoop-agent-name"
+
+    # (Optional) List of tags to apply to the HOOP connection.
+    # Default: []
+    tags: []
