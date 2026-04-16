@@ -140,9 +140,13 @@ usage: |-
                 disk_size: 10
 
       hoop:
-        enabled: false                         # (Optional) Enable HOOP agent integration. Default: false
-        agent:   "hoop-agent-name"             # (Optional) HOOP agent name
-        tags:    []                            # (Optional) HOOP connection tags
+        enabled:        false                  # (Optional) Enable hoop_connections output. Default: false
+        community:      true                   # (Optional) true=community (returns null for AzureRM), false=enterprise. Default: true
+        agent_id:       ""                     # (Required when enabled+enterprise) Hoop.dev agent UUID
+        tags:           {}                     # (Optional) Tags map for the Hoop connection. Default: {}
+        access_control: []                     # (Optional) Access control group list. Default: []
+        import:         false                  # (Optional) Import existing Hoop connection instead of creating. Default: false
+        # Output hoop_connections["admin"].name pattern: "mongo-db-<cluster_name>-ow"
     }
   }
   ```

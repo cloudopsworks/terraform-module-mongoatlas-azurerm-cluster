@@ -168,9 +168,13 @@ inputs = {
               disk_size: 10
 
     hoop:
-      enabled: false                         # (Optional) Enable HOOP agent integration. Default: false
-      agent:   "hoop-agent-name"             # (Optional) HOOP agent name
-      tags:    []                            # (Optional) HOOP connection tags
+      enabled:        false                  # (Optional) Enable hoop_connections output. Default: false
+      community:      true                   # (Optional) true=community (returns null for AzureRM), false=enterprise. Default: true
+      agent_id:       ""                     # (Required when enabled+enterprise) Hoop.dev agent UUID
+      tags:           {}                     # (Optional) Tags map for the Hoop connection. Default: {}
+      access_control: []                     # (Optional) Access control group list. Default: []
+      import:         false                  # (Optional) Import existing Hoop connection instead of creating. Default: false
+      # Output hoop_connections["admin"].name pattern: "mongo-db-<cluster_name>-ow"
   }
 }
 ```
@@ -366,6 +370,7 @@ Available targets:
 | Name | Type |
 |------|------|
 | [azurerm_key_vault_secret.atlas_cred](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.atlas_cred_conn_string](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault.atlas_cred](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault) | data source |
 | [azurerm_subscription.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subscription) | data source |
 
@@ -382,7 +387,7 @@ Available targets:
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | (optional) The ID of the Atlas project where the cluster will be created | `string` | `""` | no |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | (optional) The name of the Atlas project where the cluster will be created | `string` | `""` | no |
 | <a name="input_region"></a> [region](#input\_region) | Azure Region to deploy resources into. Example: 'eastus2', defaults to empty string as some of the resources may not require region setting. | `string` | `""` | no |
-| <a name="input_run_hoop"></a> [run\_hoop](#input\_run\_hoop) | Run hoop with agent, be careful with this option, it will run the HOOP command in output in a null\_resource | `bool` | `false` | no |
+| <a name="input_run_hoop"></a> [run\_hoop](#input\_run\_hoop) | DEPRECATED: No-op. Use the hoop\_connections output with terraform-module-hoop-connection instead. | `bool` | `false` | no |
 | <a name="input_settings"></a> [settings](#input\_settings) | Settings for the MongoDB Atlas cluster and Azure integrations | `any` | `{}` | no |
 | <a name="input_spoke_def"></a> [spoke\_def](#input\_spoke\_def) | Spoke ID Number, must be a 3 digit number | `string` | `"001"` | no |
 
@@ -400,6 +405,7 @@ Available targets:
 | <a name="output_cluster_server_type"></a> [cluster\_server\_type](#output\_cluster\_server\_type) | n/a |
 | <a name="output_cluster_state"></a> [cluster\_state](#output\_cluster\_state) | n/a |
 | <a name="output_cluster_version"></a> [cluster\_version](#output\_cluster\_version) | n/a |
+| <a name="output_hoop_connections"></a> [hoop\_connections](#output\_hoop\_connections) | Hoop connection definition for the cluster admin user.<br/>Returns null in community mode — Azure Key Vault has no native Hoop community provider.<br/>Enterprise mode: pass directly as the `connections` input to terraform-module-hoop-connection.<br/>Note: terraform-module-hoop-connection manages connections via the Hoop provider; ensure your<br/>Hoop agent has access to retrieve secrets from Azure Key Vault. |
 
 
 
