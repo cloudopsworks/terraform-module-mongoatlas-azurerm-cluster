@@ -23,7 +23,7 @@ project_name: ""
 # Default: "AZURE"
 cloud_provider: "AZURE"
 
-# (Optional) Run hoop with agent. Be careful — this executes the HOOP command via a null_resource.
+# (Deprecated) No-op. Use hoop_connections output with terraform-module-hoop-connection instead.
 # Default: false
 run_hoop: false
 
@@ -430,16 +430,23 @@ settings:
             count: 3
             disk_size: 10
 
-  # (Optional) HOOP agent integration configuration.
+  # (Optional) Hoop.dev connection output configuration.
   hoop:
-    # (Optional) Enable HOOP agent integration for cluster access.
-    # Default: false
+    # (Optional) Enable hoop_connections output. Default: false.
     enabled: false
 
-    # (Optional) HOOP agent name to associate with this cluster.
-    # Default: null
-    agent: "hoop-agent-name"
+    # (Optional) true=community (returns null for AzureRM), false=enterprise (_envs/azure/).
+    # Default: true.
+    community: true
 
-    # (Optional) List of tags to apply to the HOOP connection.
-    # Default: []
-    tags: []
+    # (Required when enabled+enterprise) Hoop.dev agent UUID. Replaces deprecated `agent`.
+    agent_id: ""
+
+    # (Optional) Tags map for the Hoop connection. Default: {}.
+    tags: {}
+
+    # (Optional) Access control group list. Default: [].
+    access_control: []
+
+    # (Optional) Import existing Hoop connection instead of creating. Default: false.
+    import: false
