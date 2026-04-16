@@ -19,7 +19,6 @@ module "cluster" {
   project_id     = var.project_id
   project_name   = var.project_name
   cloud_provider = var.cloud_provider
-  run_hoop       = var.run_hoop
   # Azure region names (e.g. "eastus2") do not map 1:1 to Atlas region names.
   # Use settings.regions[].region to specify Atlas region names explicitly (e.g. "US_EAST_2").
   region   = var.region

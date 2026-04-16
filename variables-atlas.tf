@@ -14,7 +14,7 @@ variable "cloud_provider" {
 }
 
 variable "run_hoop" {
-  description = "Run hoop with agent, be careful with this option, it will run the HOOP command in output in a null_resource"
+  description = "DEPRECATED: No-op. Use the hoop_connections output with terraform-module-hoop-connection instead."
   type        = bool
   default     = false
 }
@@ -161,9 +161,12 @@ variable "project_name" {
 #             count: 3
 #             disk_size: 10
 #   hoop:
-#     enabled: false                     # (Optional) Enable HOOP agent integration. Default: false
-#     agent: "hoop-agent-name"           # (Optional) HOOP agent name. Default: null
-#     tags: []                           # (Optional) List of tags for the HOOP connection. Default: []
+#     enabled: false                              # (Optional) Enable hoop_connections output. Default: false.
+#     community: true                             # (Optional) true=community (returns null for AzureRM), false=enterprise (_envs/azure/). Default: true.
+#     agent_id: "xxxxxxxx-xxxx-xxxx-xxxx-xxxx"  # (Required when enabled+enterprise) Hoop.dev agent UUID. Replaces deprecated `agent`.
+#     tags: {}                                    # (Optional) Tags map for the Hoop connection. Default: {}.
+#     access_control: []                          # (Optional) Access control group list. Default: [].
+#     import: false                               # (Optional) Import existing Hoop connection instead of creating. Default: false.
 variable "settings" {
   description = "Settings for the MongoDB Atlas cluster and Azure integrations"
   type        = any
