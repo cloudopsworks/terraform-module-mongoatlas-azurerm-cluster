@@ -44,7 +44,7 @@ output "hoop_connections" {
   EOD
   value = local.hoop_enterprise ? {
     "admin" = {
-      name           = "mongo-db-${lower(module.cluster.cluster_name)}-admin"
+      name           = "mongo-db-${lower(module.cluster.cluster_name)}-ow"
       agent_id       = var.settings.hoop.agent_id
       type           = "database"
       subtype        = "mongodb"
